@@ -11,16 +11,32 @@
 // usando multer com diskStorage. Não utilize provedores externos.
 
 const express = require('express');
+const multer = require('multer');
+const documentsRouter = require('./routes/documents.routes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 
-// Endpoint de verificação de saúde. As demais rotas (/upload, /documents,
-// /documents/:id/download) serão implementadas durante o Passo 2.
 app.get('/health', (req, res) => {
   res.json({ status: 'ok' });
+});
+
+app.use(documentsRouter);
+
+app.use((error, req, res, next) => {
+  if (res.headersSent) return next(error);
+
+  if (error instanceof multer.MulterError) {
+    return res.status(400).json({ error: 'Upload invalido. Use o campo file para um unico arquivo.' });
+  }
+
+  if (error.code === 'ENOENT' || error.status === 404) {
+    return res.status(404).json({ error: 'Documento nao encontrado.' });
+  }
+
+  return res.status(500).json({ error: 'Nao foi possivel concluir a operacao.' });
 });
 
 if (require.main === module) {
