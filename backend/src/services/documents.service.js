@@ -31,4 +31,4 @@ function getDocument(id) {
   return document;
 }
 
-module.exports = { createDocument, listDocuments, getDocument };
+module.exports = { createDocument, listDocuments, getDocument  };
